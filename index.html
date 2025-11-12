@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has('id')) {
+            const defaultId = 1231313;
+            const newUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'id=' + defaultId;
+            window.history.replaceState({}, '', newUrl);
+        }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffb74d, #ff9800);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            color: #e0e0e0;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 60%;
+                margin: 20px auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 95%;
+                margin: 20px auto;
+            }
+
+            .video-container {
+                padding-top: 130%;
+            }
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00c853;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+            transition: all 0.25s ease;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .capture-btn:hover {
+                background: #00e676;
+                transform: translateX(-50%) scale(1.05);
+            }
+
+        .info-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .instructions {
+            margin: 16px 0 5px 0;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .photo-count {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .preview {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .img-card {
+            position: relative;
+            flex: 0 0 auto;
+            width: 110px;
+            height: 150px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .img-card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            }
+
+            .img-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .timestamp {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 11px;
+            padding: 4px 0;
+            text-align: center;
+        }
+
+        .angle-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-bottom-right-radius: 8px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            z-index: 5;
+        }
+
+        .spinner {
+            border: 4px solid #ccc;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s, bottom 0.4s;
+            z-index: 100;
+        }
+
+            .toast.show {
+                opacity: 1;
+                bottom: 35px;
+            }
+
+        canvas {
+            display: none;
+        }
+
+        #uploadAllBtn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+            #lightbox img {
+                max-width: 90%;
+                max-height: 90%;
+                border-radius: 12px;
+            }
+
+        .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220,0,0,0.85);
+            color: #fff;
+            font-size: 16px;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .photo-guide {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+            .photo-guide p {
+                font-size: 14px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+        .guide-images {
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            gap: 10px; 
+            margin-top: 10px;
+        }
+
+            .guide-images img {
+                width: 90%; 
+                max-width: 400px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+                .guide-images img:hover {
+                    transform: scale(1.1);
+                }
+
+        .angle-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+            .angle-buttons button {
+                flex: 1;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #007bff;
+                background: white;
+                color: #007bff;
+                font-weight: bold;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+                .angle-buttons button.selected {
+                    background: #007bff;
+                    color: white;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Đang khởi động camera...</div>
+        </div>
+
+        <div class="angle-buttons" id="angleButtons">
+            <button data-angle="goc_cheo_truoc_lai">Trước trái</button>
+            <button data-angle="goc_cheo_truoc_phu">Trước phải</button>
+            <button data-angle="goc_cheo_sau_lai">Sau trái</button>
+            <button data-angle="goc_cheo_sau_phu">Sau phải</button>
+            <button data-angle="goc_chinh_dien">Thẳng xe</button>
+        </div>
+
+
+        <div class="video-container">
+            <video id="camera" autoplay playsinline></video>
+            <div class="info-overlay" id="deviceInfo">Đang lấy thông tin...</div>
+            <button class="capture-btn" id="captureBtn">
+                <img src="/Resources/camera.png" alt="Chụp" class="btn-icon">
+            </button>
+        </div>
+
+        <div class="instructions">Giữ camera thẳng, đủ sáng. Tối đa 5 ảnh.</div>
+        <div class="photo-count" id="photoCount">0 / 5 ảnh đã chụp</div>
+        <div class="preview" id="preview"></div>
+        <button id="uploadAllBtn">Upload tất cả ảnh</button>
+
+        <div class="photo-guide">
+            <p>Hãy chụp đầy đủ các góc và đủ sáng như các mẫu dưới đây:</p>
+            <div class="guide-images">
+                <img src="/Resources/chinh_dien.jpg" alt="Góc chính diện">
+                <img src="/Resources/cheo_truoc_ben_lai.jpg" alt="Góc chéo trước bên lái">
+                <img src="/Resources/cheo_sau_ben_lai.jpg" alt="Góc chéo sau bên lái">
+                <img src="/Resources/cheo_truoc_ben_phu.jpg" alt="Góc chéo trước bên phụ">
+                <img src="/Resources/cheo_sau_ben_phu.jpg" alt="Góc chéo sau bên phụ">
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <canvas id="canvas"></canvas>
+    <div id="lightbox" onclick="this.style.display='none'"><img id="lightboxImg"></div>
+
+    <script>
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('canvas');
+        const preview = document.getElementById('preview');
+        const captureBtn = document.getElementById('captureBtn');
+        const deviceInfoDiv = document.getElementById('deviceInfo');
+        const photoCountDiv = document.getElementById('photoCount');
+        const loadingOverlay = document.getElementById('loading');
+        const toast = document.getElementById('toast');
+        const uploadAllBtn = document.getElementById('uploadAllBtn');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const angleButtons = document.querySelectorAll('#angleButtons button');
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        let locationData = { lat: null, lon: null };
+        let deviceInfo = { userAgent: navigator.userAgent, platform: navigator.platform, ip: "Đang lấy..." };
+        let photoNum = 0, MAX_PHOTOS = 5;
+        let photos = [];
+        let selectedAngle = null;       
+        let selectedAngleText = "";  
+
+
+        function showToast(msg, success = true) {
+            toast.textContent = msg;
+            toast.style.background = success ? "rgba(0,150,0,0.9)" : "rgba(220,0,0,0.9)";
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        angleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                angleButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedAngle = btn.dataset.angle;
+                selectedAngleText = btn.textContent;
+            });
+        });
+
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                loadingOverlay.style.display = "none";
+            } catch (err) {
+                loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
+                console.error(err);
+            }
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(pos => {
+                locationData.lat = pos.coords.latitude;
+                locationData.lon = pos.coords.longitude;
+                updateDeviceInfo();
+            }, err => console.warn('Không lấy vị trí:', err.message));
+        }
+
+        async function getIP() {
+            try {
+                const res = await fetch("https://api.ipify.org?format=json");
+                const data = await res.json();
+                deviceInfo.ip = data.ip;
+                updateDeviceInfo();
+            } catch (err) { console.warn("Không lấy được IP", err); }
+        }
+
+        function updateDeviceInfo() {
+            deviceInfoDiv.innerHTML = `
+             <strong>Thiết bị:</strong> ${deviceInfo.platform} - ${deviceInfo.model ?? "?"}<br>
+             <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
+             <strong>IP:</strong> ${deviceInfo.ip}<br>
+             <strong>ID hợp đồng:</strong> ${id}<br>
+             <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
+             `;
+        }
+
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            if (ua.includes("Chrome") && ua.includes("Edg")) return "Microsoft Edge (Chromium)";
+            if (ua.includes("Chrome")) return "Google Chrome";
+            if (ua.includes("Firefox")) return "Mozilla Firefox";
+            if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
+            if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+            return "Trình duyệt không xác định";
+        }
+
+        function makeSafeName(angleKey) {
+            const now = new Date();
+            const pad = v => String(v).padStart(2, '0');
+            const YYYY = now.getFullYear();
+            const MM = pad(now.getMonth() + 1);
+            const DD = pad(now.getDate());
+            const hh = pad(now.getHours());
+            const mm = pad(now.getMinutes());
+            const ss = pad(now.getSeconds());
+            return `${angleKey}_${YYYY}${MM}${DD}${hh}${mm}${ss}.jpg`;
+        }
+
+        function isAngleCaptured(angle) {
+            return photos.some(photo => photo.angle === angle);
+        }
+
+        captureBtn.addEventListener('click', async () => {
+            if (!selectedAngle) return showToast('Hãy chọn góc chụp!', false);
+            if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh`, false);
+
+            if (isAngleCaptured(selectedAngleText)) {
+                return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, false);
+            }
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            const timestamp = new Date().toLocaleString();
+            const safeName = makeSafeName(selectedAngle); 
+
+            const photoObj = { dataUrl, angle: selectedAngleText, safeName, timestamp };
+            photos.push(photoObj);
+
+            const card = document.createElement('div');
+            card.className = 'img-card';
+
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.alt = photoObj.safeName;
+            img.addEventListener('click', () => { lightboxImg.src = dataUrl; lightbox.style.display = 'flex'; });
+
+            const label = document.createElement('div');
+            label.className = 'angle-label';
+            label.textContent = photoObj.angle;
+
+            const ts = document.createElement('div');
+            ts.className = 'timestamp';
+            ts.textContent = photoObj.timestamp;
+
+            const del = document.createElement('div');
+            del.className = 'delete-btn';
+            del.textContent = '×';
+            del.title = 'Xóa ảnh';
+            del.addEventListener('click', (e) => {
+                e.stopPropagation();
+                preview.removeChild(card);
+                photos = photos.filter(p => p !== photoObj);
+                updatePhotoCount();
+            });
+
+            card.appendChild(img);
+            card.appendChild(label);
+            card.appendChild(ts);
+            card.appendChild(del);
+            preview.appendChild(card);
+
+            updatePhotoCount();
+        });
+
+        function updatePhotoCount() { photoCountDiv.textContent = `${photos.length} / ${MAX_PHOTOS} ảnh đã chụp`; }
+
+        uploadAllBtn.addEventListener("click", async () => {
+            if (photos.length === 0) return showToast("Chưa có ảnh để upload!", false);
+
+            loadingOverlay.style.display = "flex";
+            loadingOverlay.querySelector(".loading-text").textContent = "Đang tải ảnh lên...";
+
+            for (const photo of photos) {
+                const blob = await (await fetch(photo.dataUrl)).blob();
+                const file = new File([blob], photo.safeName, { type: 'image/jpeg' });
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("angle", photo.angle);
+                formData.append("timestamp", photo.timestamp);
+
+                try { await fetch("/upload", { method: "POST", body: formData }); }
+                catch (err) { console.error("Upload lỗi:", err); showToast("❌ Lỗi khi tải lên!", false); }
+            }
+
+            loadingOverlay.style.display = "none";
+            showToast("✔️ Tất cả ảnh đã được tải lên");
+
+            photos = []; photoNum = 0;
+            photoCountDiv.textContent = `0 / ${MAX_PHOTOS} ảnh đã chụp`;
+            preview.innerHTML = "";
+        });
+
+        async function getDeviceModel() {
+            if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                try {
+                    const data = await navigator.userAgentData.getHighEntropyValues(["model", "platform", "platformVersion", "uaFullVersion"]);
+                    deviceInfo.model = data.model || "Không xác định";
+                    deviceInfo.platform = data.platform || deviceInfo.platform;
+                    deviceInfo.uaFullVersion = data.uaFullVersion;
+                    updateDeviceInfo();
+                } catch (err) { console.warn("Không thể lấy model:", err); }
+            } else { deviceInfo.model = "Không hỗ trợ (userAgentData)"; updateDeviceInfo(); }
+        }
+
+        document.querySelectorAll(".guide-images img").forEach(img => {
+            img.addEventListener("click", () => {
+                lightboxImg.src = img.src;
+                lightbox.style.display = "flex";
+            });
+        });
+
+        getDeviceModel();
+        initCamera();
+        getLocation();
+        getIP();
+        updateDeviceInfo();
+    </script>
+</body>
+</html>
