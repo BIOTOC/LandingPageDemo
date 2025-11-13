@@ -41,7 +41,7 @@
         .video-container {
             position: relative;
             width: 100%;
-            padding-top: 75%;
+            padding-top: 85%;
             border-radius: 12px;
             overflow: hidden;
             background: #000;
@@ -62,7 +62,13 @@
             }
 
             .video-container {
-                padding-top: 130%;
+                padding-top: 150%;
+            }
+
+            .capture-btn {
+                width: 45px; 
+                height: 45px; 
+                font-size: 23px; 
             }
         }
 
@@ -393,7 +399,7 @@
 
         <div class="video-container">
             <video id="camera" autoplay playsinline></video>
-            <img id="overlay" class="overlay" src="" alt="Khung hướng dẫn" />
+            <img id="overlay" class="overlay" src="" alt="Khung hướng dẫn" style="display:none;"/>
             <div class="info-overlay" id="deviceInfo">Đang lấy thông tin...</div>
             <button class="capture-btn" id="captureBtn">
                 <img src="/Resources/camera.png" alt="Chụp" class="camera-icon" />
@@ -655,6 +661,44 @@
                     break;
             }
         }
+
+        function changeOverlay(angle) {
+            if (!angle) {
+                overlay.style.display = "none";
+                return;
+            }
+
+            let newSrc = "";
+            switch (angle) {
+                case "goc_chinh_dien":
+                    newSrc = "/Resources/1.png";
+                    break;
+                case "goc_cheo_truoc_lai":
+                    newSrc = "/Resources/2.png";
+                    break;
+                case "goc_cheo_sau_lai":
+                    newSrc = "/Resources/5.png";
+                    break;
+                case "goc_cheo_truoc_phu":
+                    newSrc = "/Resources/4.png";
+                    break;
+                case "goc_cheo_sau_phu":
+                    newSrc = "/Resources/3.png";
+                    break;
+                default:
+                    newSrc = "";
+                    break;
+            }
+
+            if (newSrc) {
+                overlay.src = newSrc;
+                overlay.style.display = "block";   
+                overlay.style.opacity = 0.6;
+            } else {
+                overlay.style.display = "none";   
+            }
+        }
+
 
 
         getDeviceModel();
