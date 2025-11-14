@@ -15,6 +15,9 @@
     </script>
 
     <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
 
 </head>
 <body>
@@ -93,6 +96,26 @@
         document.body.classList.add('no-scroll');
         loadingOverlay.style.display = 'flex';
 
+        let aiModel = null;
+
+        async function loadAIModel() {
+            aiModel = await cocoSsd.load();
+            console.log("AI model loaded!");
+        }
+        loadAIModel();
+
+        async function checkCar(imageElement) {
+            if (!aiModel) return false;
+
+            const predictions = await aiModel.detect(imageElement);
+
+            console.log("Predictions:", predictions);
+
+            return predictions.some(p =>
+                (p.class === "car" || p.class === "truck") && p.score > 0.5
+            );
+        }
+
         function showToast(msg, success = true) {
             toast.textContent = msg;
             toast.style.background = success ? "rgba(0,150,0,0.9)" : "rgba(220,0,0,0.9)";
@@ -169,6 +192,64 @@
             return photos.some(photo => photo.angle === angle);
         }
 
+        //captureBtn.addEventListener('click', async () => {
+        //    if (!selectedAngle) return showToast('Hãy chọn góc chụp!', false);
+        //    if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh`, false);
+
+        //    if (isAngleCaptured(selectedAngleText)) {
+        //        return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, false);
+        //    }
+
+        //    const ctx = canvas.getContext('2d');
+        //    canvas.width = video.videoWidth || 1280;
+        //    canvas.height = video.videoHeight || 720;
+        //    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        //    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        //    const timestamp = new Date().toLocaleString();
+        //    const safeName = makeSafeName(selectedAngle);
+
+
+
+        //    const photoObj = { dataUrl, angle: selectedAngleText, safeName, timestamp };
+        //    photos.push(photoObj);
+
+        //    const card = document.createElement('div');
+        //    card.className = 'img-card';
+
+        //    const img = document.createElement('img');
+        //    img.src = dataUrl;
+        //    img.alt = photoObj.safeName;
+        //    img.addEventListener('click', () => { lightboxImg.src = dataUrl; lightbox.style.display = 'flex'; });
+
+        //    const label = document.createElement('div');
+        //    label.className = 'angle-label';
+        //    label.textContent = photoObj.angle;
+
+        //    const ts = document.createElement('div');
+        //    ts.className = 'timestamp';
+        //    ts.textContent = photoObj.timestamp;
+
+        //    const del = document.createElement('div');
+        //    del.className = 'delete-btn';
+        //    del.textContent = '×';
+        //    del.title = 'Xóa ảnh';
+        //    del.addEventListener('click', (e) => {
+        //        e.stopPropagation();
+        //        preview.removeChild(card);
+        //        photos = photos.filter(p => p !== photoObj);
+        //        updatePhotoCount();
+        //    });
+
+        //    card.appendChild(img);
+        //    card.appendChild(label);
+        //    card.appendChild(ts);
+        //    card.appendChild(del);
+        //    preview.appendChild(card);
+
+        //    updatePhotoCount();
+        //});
+
         captureBtn.addEventListener('click', async () => {
             if (!selectedAngle) return showToast('Hãy chọn góc chụp!', false);
             if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh`, false);
@@ -182,7 +263,20 @@
             canvas.height = video.videoHeight || 720;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            // Tạo ảnh tạm để AI detect
+            const tempImg = new Image();
+            tempImg.src = canvas.toDataURL('image/jpeg', 0.9);
+            await new Promise(r => tempImg.onload = r);
+
+            // 🧠 KIỂM TRA XE BẰNG AI
+            const isCar = await checkCar(tempImg);
+
+            if (!isCar) {
+                return showToast("❌ Không phát hiện thấy xe trong ảnh. Vui lòng chụp lại!", false);
+            }
+
+            // Nếu AI OK → tiếp tục logic của bạn
+            const dataUrl = tempImg.src;
             const timestamp = new Date().toLocaleString();
             const safeName = makeSafeName(selectedAngle);
 
@@ -195,7 +289,10 @@
             const img = document.createElement('img');
             img.src = dataUrl;
             img.alt = photoObj.safeName;
-            img.addEventListener('click', () => { lightboxImg.src = dataUrl; lightbox.style.display = 'flex'; });
+            img.addEventListener('click', () => {
+                lightboxImg.src = dataUrl;
+                lightbox.style.display = 'flex';
+            });
 
             const label = document.createElement('div');
             label.className = 'angle-label';
@@ -224,6 +321,7 @@
 
             updatePhotoCount();
         });
+
 
         function updatePhotoCount() { photoCountDiv.textContent = `${photos.length} / ${MAX_PHOTOS} ảnh đã chụp`; }
 
