@@ -108,48 +108,24 @@
             });
         });
 
-        //async function initCamera() {
-        //    try {
-        //        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        //        video.srcObject = stream;
-        //        loadingOverlay.style.display = "none";
-        //    } catch (err) {
-        //        loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
-        //        console.error(err);
-        //    }
-        //}
-
-        //function getLocation() {
-        //    if (!navigator.geolocation) return;
-        //    navigator.geolocation.getCurrentPosition(pos => {
-        //        locationData.lat = pos.coords.latitude;
-        //        locationData.lon = pos.coords.longitude;
-        //        updateDeviceInfo();
-        //    }, err => console.warn('Không lấy vị trí:', err.message));
-        //}
-
-        async function requestPermissions() {
-            // Camera
+        async function initCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                console.log("Camera được cấp quyền");
+                loadingOverlay.style.display = "none";
             } catch (err) {
-                console.warn("Không được cấp quyền camera:", err);
+                loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
+                console.error(err);
             }
+        }
 
-            // Location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        locationData.lat = pos.coords.latitude;
-                        locationData.lon = pos.coords.longitude;
-                        updateDeviceInfo();
-                        console.log("Vị trí được cấp quyền");
-                    },
-                    err => console.warn("Không được cấp quyền vị trí:", err)
-                );
-            }
+        function getLocation() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(pos => {
+                locationData.lat = pos.coords.latitude;
+                locationData.lon = pos.coords.longitude;
+                updateDeviceInfo();
+            }, err => console.warn('Không lấy vị trí:', err.message));
         }
 
         async function getIP() {
@@ -347,9 +323,8 @@
         });
 
         getDeviceModel();
-        //initCamera();
-        //getLocation();
-        requestPermissions();
+        initCamera();
+        getLocation();
         getIP();
         updateDeviceInfo();
     </script>
