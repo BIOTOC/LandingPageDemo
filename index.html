@@ -90,6 +90,9 @@
         let selectedAngle = null;
         let selectedAngleText = "";
 
+        document.body.classList.add('no-scroll');
+        loadingOverlay.style.display = 'flex';
+
         function showToast(msg, success = true) {
             toast.textContent = msg;
             toast.style.background = success ? "rgba(0,150,0,0.9)" : "rgba(220,0,0,0.9)";
@@ -112,6 +115,7 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
+                document.body.classList.remove('no-scroll');
                 loadingOverlay.style.display = "none";
             } catch (err) {
                 loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
