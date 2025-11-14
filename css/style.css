@@ -31,7 +31,7 @@ body {
 .video-container {
     position: relative;
     width: 100%;
-    padding-top: 100%;
+    padding-top: 150%;
     border-radius: 12px;
     overflow: hidden;
     background: #000;
@@ -43,20 +43,12 @@ body {
         max-width: 60%;
         margin: 20px auto;
     }
-
-    .video-container {
-        padding-top: 140%;
-    }
 }
 
 @media (max-width: 480px) {
     .container {
         max-width: 95%;
         margin: 20px auto;
-    }
-
-    .video-container {
-        padding-top: 150%;
     }
 
     .capture-btn {
