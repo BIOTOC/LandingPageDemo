@@ -8,7 +8,7 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.has('id')) {
-            const defaultId = HDS2323i4i34232;
+            const defaultId = "HDS2323i4i34232";
             const newUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'id=' + defaultId;
             window.history.replaceState({}, '', newUrl);
         }
