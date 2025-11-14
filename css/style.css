@@ -80,7 +80,7 @@ video {
 
 /*--------------------------------------------------------------------*/
 
-.overlay {
+/*.overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -89,7 +89,20 @@ video {
     object-fit: contain;
     opacity: 0.6;
     pointer-events: none;
+}*/
+
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%; 
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    opacity: 0.6;
+    pointer-events: none;
 }
+
 
 /*-------------------------------------------------------------------*/
 
