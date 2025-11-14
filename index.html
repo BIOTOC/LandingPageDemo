@@ -46,8 +46,9 @@
         <div class="preview" id="preview"></div>
         <button id="uploadAllBtn">Upload tất cả ảnh</button>
 
-        <div class="photo-guide">
-            <p>Hãy chụp đầy đủ các góc và đủ sáng như các mẫu dưới đây:</p>
+        <div class="photo-guide">s
+            <p>Hãy chụp đầy đủ các góc và đủ sáng như các mẫu dưới đây. <br />
+            Lưu ý: Có thể xem ảnh sau khi chụp, Nếu không đạt yêu cầu có thể xóa đi và chụp lại.</p>
             <div class="guide-images">
                 <img src="/Resources/chinh_dien.jpg" alt="Góc chính diện">
                 <img src="/Resources/cheo_truoc_ben_lai.jpg" alt="Góc chéo trước bên lái">
@@ -61,7 +62,6 @@
     <div id="toast" class="toast"></div>
     <canvas id="canvas"></canvas>
 
-    <!--<div id="lightbox" onclick="this.style.display='none'"><img id="lightboxImg"></div>-->
     <div id="lightbox">
         <span id="lightboxClose">&times;</span>
         <img id="lightboxImg" />
@@ -316,7 +316,6 @@
             }
         }
 
-        //-------------------------------------------------------------------------
         const lightbox = document.getElementById("lightbox");
         const lightboxClose = document.getElementById("lightboxClose");
 
@@ -330,7 +329,6 @@
                 lightbox.style.display = "flex";
             });
         });
-
 
         getDeviceModel();
         initCamera();
