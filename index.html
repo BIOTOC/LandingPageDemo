@@ -8,8 +8,11 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.has('id')) {
-            const defaultId = "HDS2323i4i34232";
-            const newUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'id=' + defaultId;
+            const Id = "HDS2323i4i34232";
+            const Iddt = "832173141432";
+            urlParams.set('id', Id);
+            urlParams.set('iddt', Iddt);
+            const newUrl = window.location.pathname + "?" + urlParams.toString();
             window.history.replaceState({}, '', newUrl);
         }
     </script>
@@ -82,6 +85,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
+        const iddt = params.get('iddt');
 
         let locationData = { lat: null, lon: null };
         let deviceInfo = { userAgent: navigator.userAgent, platform: navigator.platform, ip: "Đang lấy..." };
@@ -147,6 +151,7 @@
                  <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
                  <strong>IP:</strong> ${deviceInfo.ip}<br>
                  <strong>ID hợp đồng:</strong> ${id}<br>
+                 <strong>ID đối tượng:</strong> ${iddt}<br>
                  <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
                  `;
         }
@@ -233,26 +238,92 @@
             loadingOverlay.style.display = "flex";
             loadingOverlay.querySelector(".loading-text").textContent = "Đang tải ảnh lên...";
 
+            const formData = new FormData();
+
             for (const photo of photos) {
                 const blob = await (await fetch(photo.dataUrl)).blob();
-                const file = new File([blob], photo.safeName, { type: 'image/jpeg' });
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("angle", photo.angle);
-                formData.append("timestamp", photo.timestamp);
+                const file = new File([blob], photo.safeName, { type: "image/jpeg" });
+                formData.append("images", file);  
+            }
 
-                try { await fetch("/upload", { method: "POST", body: formData }); }
-                catch (err) { console.error("Upload lỗi:", err); showToast("❌ Lỗi khi tải lên!", false); }
+            let metadataText = `ID hợp đồng: ${id}\n`;
+            let metadataText = `ID đối tượng: ${iddt}\n`;
+            metadataText += `IP: ${deviceInfo.ip}\n`;
+            metadataText += `Thiết bị: ${deviceInfo.platform} - ${deviceInfo.model}\n`;
+            metadataText += `Vị trí: ${locationData.lat}, ${locationData.lon}\n`;
+            metadataText += `---------------------------------------\n\n`;
+
+            photos.forEach((p, i) => {
+                metadataText += `Ảnh ${i + 1}:\n`;
+                metadataText += `- Góc chụp: ${p.angle}\n`;
+                metadataText += `- Tên file: ${p.safeName}\n`;
+                metadataText += `- Thời gian: ${p.timestamp}\n`;
+                metadataText += `---------------------------------------\n\n`;
+            });
+
+            const txtBlob = new Blob([metadataText], { type: "text/plain" });
+            formData.append("metadata", txtBlob, "info.txt");
+
+            try {
+                const res = await fetch("/api/upload", { method: "POST", body: formData });
+                if (!res.ok) throw new Error("Upload thất bại");
+
+                showToast("✔ Upload thành công!");
+                photos = [];
+                preview.innerHTML = "";
+                updatePhotoCount();
+
+            } catch (err) {
+                console.error(err);
+                showToast("❌ Upload thất bại!", false);
             }
 
             loadingOverlay.style.display = "none";
-            showToast("✔️ Tất cả ảnh đã được tải lên");
-
-            photos = [];
-            photoNum = 0;
-            photoCountDiv.textContent = `0 / ${MAX_PHOTOS} ảnh đã chụp`;
-            preview.innerHTML = "";
         });
+
+        //uploadAllBtn.addEventListener("click", async () => {
+        //    if (photos.length === 0) return showToast("Chưa có ảnh để upload!", false);
+
+        //    loadingOverlay.style.display = "flex";
+        //    loadingOverlay.querySelector(".loading-text").textContent = "Đang tải ảnh lên...";
+
+        //    const formData = new FormData();
+
+        //    for (const photo of photos) {
+        //        const blob = await (await fetch(photo.dataUrl)).blob();
+        //        const file = new File([blob], photo.safeName, { type: "image/jpeg" });
+        //        formData.append("images", file);  
+        //    }
+
+        //    formData.append("contractId", id);  
+
+        //    try {
+        //        const res = await fetch("/api/uploadAll", {
+        //            method: "POST",
+        //            body: formData
+        //        });
+
+        //        if (!res.ok) {
+        //            const errorText = await res.text();
+        //            throw new Error(errorText || "Upload thất bại");
+        //        }
+
+        //        const resJson = await res.json();
+        //        console.log("Response backend:", resJson);
+
+        //        showToast("✔ Upload thành công!");
+        //        photos = [];
+        //        preview.innerHTML = "";
+        //        updatePhotoCount();
+
+        //    } catch (err) {
+        //        console.error(err);
+        //        showToast("❌ Upload thất bại!", false);
+        //    } finally {
+        //        loadingOverlay.style.display = "none";
+        //    }
+        //});
+
 
         async function getDeviceModel() {
             if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
