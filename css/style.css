@@ -1,4 +1,5 @@
-﻿* {
+﻿/* RESET */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -11,110 +12,135 @@ body {
     min-height: 100vh;
 }
 
-    body.no-scroll {
-        overflow: hidden;
-        height: 100vh;
-        touch-action: none;
-    }
+body.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+    touch-action: none;
+}
 
+/* ===== VÙNG CAMERA ===== */
 
 .container {
-    max-width: 420px;
-    margin: 40px auto;
+    width: 100%;
+    max-width: 480px;
+    margin: 20px auto;
     background: #ffffff;
     border-radius: 16px;
     padding: 18px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    color: #e0e0e0;
 }
 
 .video-container {
     position: relative;
     width: 100%;
-    padding-top: 150%;
-    border-radius: 12px;
+    aspect-ratio: 3 / 4;
+    border-radius: 16px;
     overflow: hidden;
-    background: #000;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    background: black;
 }
 
-@media (min-width: 768px) {
-    .container {
-        max-width: 60%;
-        margin: 20px auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        max-width: 95%;
-        margin: 20px auto;
-    }
-
-    .capture-btn {
-        width: 55px !important;
-        height: 55px !important;
-        font-size: 10px !important;
-    }
-}
-
-.capture-btn img.camera-icon {
-    width: 100%; 
-    height: 100%; 
-    object-fit: contain;
-}
-
-
+/* Video portrait */
 video {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
+/* Overlay portrait */
 .overlay {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 90%; 
-    height: auto;
+    width: 90%;
     transform: translate(-50%, -50%);
-    object-fit: contain;
     opacity: 0.6;
     pointer-events: none;
 }
 
+/* ======= LANDSCAPE MODE ======= */
+@media (orientation: landscape) {
+
+    body {
+        background: white !important;
+    }
+
+    .container {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: white;
+    }
+
+    .video-container {
+        width: 100vw;
+        height: 100vh;
+        aspect-ratio: unset !important;
+        border-radius: 0;
+        overflow: hidden;
+        position: relative;
+        background: black;
+    }
+
+    /* Xoay video */
+    .video-container video {
+        position: absolute;
+        width: 100vh;
+        height: 100vw;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(90deg);
+        object-fit: cover;
+    }
+
+    /* Xoay overlay theo video */
+    .video-container .overlay {
+        position: absolute;
+        width: 100vh;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .capture-btn {
+        bottom: 40px;
+        width: 80px;
+        height: 80px;
+        font-size: 20px;
+    }
+
+    .angle-buttons {
+        margin-top: 20px;
+    }
+}
+
+/* ===== NÚT CHỤP ===== */
 .capture-btn {
     position: absolute;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(252, 146, 0, 0.5);
+    background: rgba(252, 146, 0, 0.7);
     color: white;
     border: none;
     border-radius: 50%;
     width: 70px;
     height: 70px;
-    font-size: 30px;
+    font-size: 32px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: all 0.25s ease;
-    z-index: 2;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-    .capture-btn:hover {
-        background: rgba(252, 146, 0, 1);
-        transform: translateX(-50%) scale(1.05);
-    }
-
-button.capture-btn {
-    -webkit-appearance: none;
-    appearance: none;
+.capture-btn:hover {
+    background: rgba(252, 146, 0, 1);
 }
 
 .info-overlay {
@@ -167,16 +193,16 @@ button.capture-btn {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-    .img-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
+.img-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
 
-    .img-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.img-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
 .timestamp {
     position: absolute;
@@ -201,18 +227,6 @@ button.capture-btn {
     text-align: center;
     z-index: 1;
 }
-
-/*.loading-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.85);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0px;
-    z-index: 5;
-}*/
 
 .loading-overlay {
     position: fixed; 
@@ -239,13 +253,8 @@ button.capture-btn {
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .loading-text {
@@ -269,10 +278,10 @@ button.capture-btn {
     z-index: 100;
 }
 
-    .toast.show {
-        opacity: 1;
-        bottom: 35px;
-    }
+.toast.show {
+    opacity: 1;
+    bottom: 35px;
+}
 
 canvas {
     display: none;
@@ -290,22 +299,6 @@ canvas {
     cursor: pointer;
 }
 
-/*#lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-    #lightbox img {
-        max-width: 90%;
-        max-height: 90%;
-        border-radius: 12px;
-    }*/
-
 #lightbox {
     display: none;
     position: fixed;
@@ -319,10 +312,10 @@ canvas {
     align-items: center;
 }
 
-    #lightbox img {
-        max-width: 90%;
-        max-height: 90%;
-    }
+#lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+}
 
 #lightboxClose {
     position: absolute;
@@ -334,7 +327,6 @@ canvas {
     cursor: pointer;
     user-select: none;
 }
-
 
 .delete-btn {
     position: absolute;
@@ -361,11 +353,11 @@ canvas {
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-    .photo-guide p {
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 10px;
-    }
+.photo-guide p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+}
 
 .guide-images {
     display: flex;
@@ -375,16 +367,16 @@ canvas {
     margin-top: 10px;
 }
 
-    .guide-images img {
-        width: 90%;
-        max-width: 400px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
+.guide-images img {
+    width: 90%;
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
 
-        .guide-images img:hover {
-            transform: scale(1.1);
-        }
+.guide-images img:hover {
+    transform: scale(1.1);
+}
 
 .angle-buttons {
     display: flex;
@@ -393,63 +385,19 @@ canvas {
     margin-bottom: 12px;
 }
 
-    .angle-buttons button {
-        flex: 1;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid rgba(252, 146, 0, 1);
-        background: white;
-        color: rgba(252, 146, 0, 1);
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-    }
+.angle-buttons button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(252, 146, 0, 1);
+    background: white;
+    color: rgba(252, 146, 0, 1);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-        .angle-buttons button.selected {
-            background: rgba(252, 146, 0, 1);
-            color: white;
-        }
-
-
-/* CHỈ CHẶN XOAY NGANG TRÊN ĐIỆN THOẠI */
-/*@media screen and (orientation: landscape) and (max-width: 768px) {
-    body {
-        width: 100vh;
-        height: 100vw;
-        overflow: hidden;
-    }
-
-    #force-portrait {
-        display: flex !important;
-    }
-}*/
-
-/* popup ép xoay dọc */
-/*#force-portrait {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #000000ee;
+.angle-buttons button.selected {
+    background: rgba(252, 146, 0, 1);
     color: white;
-    z-index: 999999;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 22px;
-    padding: 30px;
-}*/
-
-html, body {
-    transform: rotate(0deg);
 }
-
-@media screen and (orientation: landscape) {
-    body {
-        transform: rotate(-90deg);
-        transform-origin: center;
-        width: 100vh;
-        height: 100vw;
-        overflow: hidden;
-    }
-}
-
