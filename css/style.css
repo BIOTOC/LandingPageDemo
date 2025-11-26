@@ -411,8 +411,8 @@ canvas {
         }
 
 
-/* Khi xoay ngang: chặn toàn trang */
-@media screen and (orientation: landscape) {
+/* CHỈ CHẶN XOAY NGANG TRÊN ĐIỆN THOẠI */
+@media screen and (orientation: landscape) and (max-width: 768px) {
     body {
         width: 100vh;
         height: 100vw;

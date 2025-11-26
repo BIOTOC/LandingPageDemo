@@ -15,7 +15,7 @@
             urlParams.set('token', Token);
             urlParams.set('ts', Ts);
             urlParams.set('id', Id);
-            urlParams.set('iddt', Iddt);
+            urlParams.set('id_dt', Iddt);
             const newUrl = window.location.pathname + "?" + urlParams.toString();
             window.history.replaceState({}, '', newUrl);
         }
@@ -91,7 +91,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        const iddt = params.get('iddt');
+        const iddt = params.get('id_dt');
         const token = params.get('token');
         const ts = params.get('ts');
 
@@ -109,7 +109,7 @@
         (function validateUrlParams() {
             const query = window.location.search.replace("?", "");
 
-            const pattern = /^token=.+&ts=.+&id=.+&iddt=.+$/;
+            const pattern = /^token=.+&ts=.+&id=.+&id_dt=.+$/;
 
             if (!pattern.test(query)) {
                 document.body.innerHTML = `
@@ -299,8 +299,11 @@
             if (photos.length === 0)
                 return showToast("Chưa có ảnh để upload!", false);
 
-            const token = await getToken();
-            if (!token) return showToast("Không lấy được token!", false);
+            const result = await getToken();
+            if (!result) return showToast("Không lấy được token!", false);
+
+            const token = result.token;
+            const ts = result.ts;
 
             loadingOverlay.style.display = "flex";
             loadingOverlay.querySelector(".loading-text").textContent = "Đang tải ảnh lên...";
@@ -338,7 +341,8 @@
                 const res = await fetch("https://aut.bshc.com.vn/api/car-insur/upload-files", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${token}`
+                        "token": token,
+                        "ts": ts
                     },
                     body: formData
                 });
@@ -362,24 +366,44 @@
         });
 
         async function getToken() {
-            const url = "https://aut.bshc.com.vn/oauth/token";
+            try {
+                const url = `https://aut.bshc.com.vn/api/car-insur/generate-token?id=${id}&id_dt=${iddt}`;
 
-            const body = new URLSearchParams();
-            body.append("username", "TESTPM@000");
-            body.append("password", "123456");
-            body.append("grant_type", "password");
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "Cookie": "bsh=CfDJ8IAnqBtnM29GopL1XE8TUZWdPQL4vZGBzt%2BrgZVndh80aw1CEJ%2BPKgoNO2FVv7nUNvGh58E4tFlYQFdpsRWHPsKdiLAkXZ%2FKETgswhElb39uLMOAD0qTUmXgLgslRiOLffSCUcwAwYijoxkWbkSrH3mwWtAOdCSv7qfAyKWYm9lk"
+                    }
+                });
 
-            const res = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body
-            });
+                const json = await response.json();
 
-            const data = await res.json();
-            return data.access_token; 
+                if (json.Status !== "OK" || !json.Data) {
+                    console.error("Token API error:", json);
+                    console.log("TOKEN API result:", json);
+                    return null;
+                }
+
+                const token = json.Data.Token;
+                const ts = json.Data.Timestamp;
+
+                const params = new URLSearchParams(window.location.search);
+                if (!params.get("token") || !params.get("ts")) {
+                    params.set("token", token);
+                    params.set("ts", ts);
+                    const newUrl = window.location.pathname + "?" + params.toString();
+                    window.history.replaceState({}, "", newUrl);
+                }
+
+                return { token, ts };
+
+            } catch (error) {
+                console.error("Lỗi khi gọi getToken:", error);
+                return null;
+            }
         }
+
 
         async function getDeviceModel() {
             if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
@@ -457,10 +481,33 @@
         initCamera();
         getLocation();
         //updateDeviceInfo();
+
+        //-----------------------check màn hình ngang/dọc---------------------------------------
+        function checkOrientation() {
+            const isMobile = window.innerWidth <= 768; // ngưỡng mobile
+
+            if (isMobile) {
+                if (window.innerWidth > window.innerHeight) {
+                    document.getElementById("force-portrait").style.display = "flex";
+                } else {
+                    document.getElementById("force-portrait").style.display = "none";
+                }
+            } else {
+                // Nếu là desktop thì luôn tắt
+                document.getElementById("force-portrait").style.display = "none";
+            }
+        }
+
+        window.addEventListener("resize", checkOrientation);
+        window.addEventListener("orientationchange", checkOrientation);
+
+        checkOrientation();
+        //---------------------------------------------------------------------------------------
     </script>
 </body>
+<!-- Thông báo quay màn hình dọc -->
 <div id="force-portrait">
-    Vui lòng xoay điện thoại theo chiều dọc<br>(Portrait Mode)
+    Vui lòng xoay điện thoại theo chiều dọc<br>Và tắt tính năng xoay màn hình (Để màn hình dọc)
 </div>
 </html>
 
