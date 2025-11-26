@@ -10,8 +10,8 @@
         if (!urlParams.has('token')) {
             const Token = "1234";
             const Ts = "12233223"
-            const Id = "12";
-            const Iddt = "123";
+            const Id = "1";
+            const Iddt = "1";
             urlParams.set('token', Token);
             urlParams.set('ts', Ts);
             urlParams.set('id', Id);
@@ -96,7 +96,7 @@
         const ts = params.get('ts');
 
         let locationData = { lat: null, lon: null };
-        let deviceInfo = { userAgent: navigator.userAgent, platform: navigator.platform};
+        let deviceInfo = { userAgent: navigator.userAgent, platform: navigator.platform };
         let photoNum = 0, MAX_PHOTOS = 5;
         let photos = [];
         let selectedAngle = null;
@@ -113,53 +113,53 @@
 
             if (!pattern.test(query)) {
                 document.body.innerHTML = `
-        <div style="
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #1c1c28, #101018);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-family: 'Segoe UI', sans-serif;
-        ">
             <div style="
-                background: rgba(255, 255, 255, 0.07);
-                padding: 40px 25px;
-                border-radius: 14px;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-                backdrop-filter: blur(6px);
-                max-width: 360px;
-                width: 90%;
-                animation: fadeIn 0.3s ease-out;
+                position: fixed;
+                inset: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg, #1c1c28, #101018);
+                color: white;
+                text-align: center;
+                padding: 20px;
+                font-family: 'Segoe UI', sans-serif;
             ">
                 <div style="
-                    font-size: 60px;
-                    font-weight: 700;
-                    margin-bottom: 10px;
-                    color: #ff6b6b;
-                    text-shadow: 0 0 12px rgba(255, 80, 80, 0.9);
-                ">⚠</div>
+                    background: rgba(255, 255, 255, 0.07);
+                    padding: 40px 25px;
+                    border-radius: 14px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+                    backdrop-filter: blur(6px);
+                    max-width: 360px;
+                    width: 90%;
+                    animation: fadeIn 0.3s ease-out;
+                ">
+                    <div style="
+                        font-size: 60px;
+                        font-weight: 700;
+                        margin-bottom: 10px;
+                        color: #ff6b6b;
+                        text-shadow: 0 0 12px rgba(255, 80, 80, 0.9);
+                    ">⚠</div>
 
-                <div style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">
-                    Đường dẫn không hợp lệ
-                </div>
+                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">
+                        Đường dẫn không hợp lệ
+                    </div>
 
-                <div style="font-size: 16px; color: #ddd; line-height: 1.5;">
-                    Vui lòng truy cập đúng liên kết để tiếp tục sử dụng.
+                    <div style="font-size: 16px; color: #ddd; line-height: 1.5;">
+                        Vui lòng truy cập đúng liên kết để tiếp tục sử dụng.
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <style>
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        </style>
-        `;
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
+            `;
                 throw new Error("Invalid URL format!");
             }
         })();
@@ -199,7 +199,7 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 locationData.lat = pos.coords.latitude;
                 locationData.lon = pos.coords.longitude;
-            //    updateDeviceInfo();
+                //    updateDeviceInfo();
             }, err => console.warn('Không lấy vị trí:', err.message));
         }
 
@@ -313,7 +313,7 @@
             const dataObj = {
                 Id: id,
                 IdChild: iddt,
-                productCode: "XE", 
+                productCode: "XE",
                 ttin_file: photos.map((p, idx) => ({
                     slotType: p.angleKey,
                     slotTypeNum: idx + 1,
@@ -323,18 +323,18 @@
                     CaptureTime: p.timestamp,
                     Browser: detectBrowser(),
                     Device: deviceInfo.model ?? navigator.userAgent,
-                    LinkImg: "",            
+                    LinkImg: "",
                     TypeImg: "image/jpeg"
                 }))
             };
 
-            formData.append("data", JSON.stringify(dataObj)); 
+            formData.append("data", JSON.stringify(dataObj));
 
-            
+
             for (const photo of photos) {
                 const blob = await (await fetch(photo.dataUrl)).blob();
                 const file = new File([blob], photo.safeName, { type: "image/jpeg" });
-                formData.append("files", file); 
+                formData.append("files", file);
             }
 
             try {
@@ -367,7 +367,7 @@
 
         async function getToken() {
             try {
-                const url = `https://aut.bshc.com.vn/api/car-insur/generate-token?id=${id}&id_dt=${iddt}`;
+                const url = `https://aut.bshc.com.vn/api/car-insur/generate-token?id=1&id_dt=1`;
 
                 const response = await fetch(url, {
                     method: "GET",
@@ -404,7 +404,6 @@
             }
         }
 
-
         async function getDeviceModel() {
             if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
                 try {
@@ -412,11 +411,11 @@
                     deviceInfo.model = data.model || "Không xác định";
                     deviceInfo.platform = data.platform || deviceInfo.platform;
                     deviceInfo.uaFullVersion = data.uaFullVersion;
-                //    updateDeviceInfo();
+                    //    updateDeviceInfo();
                 } catch (err) { console.warn("Không thể lấy model:", err); }
             } else {
                 deviceInfo.model = "Không hỗ trợ (userAgentData)";
-            //    updateDeviceInfo();
+                //    updateDeviceInfo();
             }
         }
 
@@ -483,18 +482,23 @@
         //updateDeviceInfo();
 
         //-----------------------check màn hình ngang/dọc---------------------------------------
-        function checkOrientation() {
-            const isMobile = window.innerWidth <= 768; // ngưỡng mobile
+        function isMobile() {
+            return Math.min(window.innerWidth, window.innerHeight) <= 769;
+        }
 
-            if (isMobile) {
-                if (window.innerWidth > window.innerHeight) {
-                    document.getElementById("force-portrait").style.display = "flex";
-                } else {
-                    document.getElementById("force-portrait").style.display = "none";
-                }
+        function checkOrientation() {
+            const force = document.getElementById("force-portrait");
+
+            if (!isMobile()) {
+                force.style.display = "none";
+                return;
+            }
+
+            // Nếu là mobile, kiểm tra xoay ngang
+            if (window.innerWidth > window.innerHeight) {
+                force.style.display = "flex";
             } else {
-                // Nếu là desktop thì luôn tắt
-                document.getElementById("force-portrait").style.display = "none";
+                force.style.display = "none";
             }
         }
 
@@ -502,13 +506,14 @@
         window.addEventListener("orientationchange", checkOrientation);
 
         checkOrientation();
+
         //---------------------------------------------------------------------------------------
     </script>
+    <!-- Thông báo quay màn hình dọc -->
+    <div id="force-portrait">
+        Vui lòng xoay điện thoại theo chiều dọc<br>Và tắt tính năng xoay màn hình (Để màn hình dọc)
+    </div>
 </body>
-<!-- Thông báo quay màn hình dọc -->
-<div id="force-portrait">
-    Vui lòng xoay điện thoại theo chiều dọc<br>Và tắt tính năng xoay màn hình (Để màn hình dọc)
-</div>
 </html>
 
 
