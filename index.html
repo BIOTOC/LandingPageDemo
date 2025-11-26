@@ -244,10 +244,41 @@
                 return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, false);
             }
 
+            const container = document.querySelector('.video-container');
             const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth || 1280;
-            canvas.height = video.videoHeight || 720;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Lấy kích thước video thực
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+
+            const videoRatio = vw / vh;
+            const containerRatio = cw / ch;
+
+            let sx, sy, sw, sh;
+
+            if (videoRatio > containerRatio) {
+                // Video rộng hơn → crop 2 bên
+                const newWidth = vh * containerRatio;
+                sx = (vw - newWidth) / 2;
+                sy = 0;
+                sw = newWidth;
+                sh = vh;
+            } else {
+                // Video cao hơn → crop trên dưới
+                const newHeight = vw / containerRatio;
+                sx = 0;
+                sy = (vh - newHeight) / 2;
+                sw = vw;
+                sh = newHeight;
+            }
+
+            canvas.width = sw;
+            canvas.height = sh;
+
+            // Chụp đúng khung hiển thị
+            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
             const timestamp = getVietnamTimeISO();
@@ -256,13 +287,17 @@
             const photoObj = { dataUrl, angle: selectedAngleText, angleKey: selectedAngle, safeName, timestamp };
             photos.push(photoObj);
 
+            // Tạo preview
             const card = document.createElement('div');
             card.className = 'img-card';
 
             const img = document.createElement('img');
             img.src = dataUrl;
             img.alt = photoObj.safeName;
-            img.addEventListener('click', () => { lightboxImg.src = dataUrl; lightbox.style.display = 'flex'; });
+            img.addEventListener('click', () => {
+                lightboxImg.src = dataUrl;
+                lightbox.style.display = 'flex';
+            });
 
             const label = document.createElement('div');
             label.className = 'angle-label';
@@ -481,6 +516,7 @@
         initCamera();
         getLocation();
         //updateDeviceInfo();
+
     </script>
 </body>
 </html>
