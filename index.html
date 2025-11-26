@@ -7,9 +7,13 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        if (!urlParams.has('id')) {
-            const Id = "123423223";
-            const Iddt = "2173141432";
+        if (!urlParams.has('token')) {
+            const Token = "1234";
+            const Ts = "12233223"
+            const Id = "12";
+            const Iddt = "123";
+            urlParams.set('token', Token);
+            urlParams.set('ts', Ts);
             urlParams.set('id', Id);
             urlParams.set('iddt', Iddt);
             const newUrl = window.location.pathname + "?" + urlParams.toString();
@@ -88,6 +92,8 @@
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
         const iddt = params.get('iddt');
+        const token = params.get('token');
+        const ts = params.get('ts');
 
         let locationData = { lat: null, lon: null };
         let deviceInfo = { userAgent: navigator.userAgent, platform: navigator.platform};
@@ -98,6 +104,65 @@
 
         document.body.classList.add('no-scroll');
         loadingOverlay.style.display = 'flex';
+
+        //Check url hợp lệ
+        (function validateUrlParams() {
+            const query = window.location.search.replace("?", "");
+
+            const pattern = /^token=.+&ts=.+&id=.+&iddt=.+$/;
+
+            if (!pattern.test(query)) {
+                document.body.innerHTML = `
+        <div style="
+            position: fixed;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1c1c28, #101018);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        ">
+            <div style="
+                background: rgba(255, 255, 255, 0.07);
+                padding: 40px 25px;
+                border-radius: 14px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+                backdrop-filter: blur(6px);
+                max-width: 360px;
+                width: 90%;
+                animation: fadeIn 0.3s ease-out;
+            ">
+                <div style="
+                    font-size: 60px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    color: #ff6b6b;
+                    text-shadow: 0 0 12px rgba(255, 80, 80, 0.9);
+                ">⚠</div>
+
+                <div style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">
+                    Đường dẫn không hợp lệ
+                </div>
+
+                <div style="font-size: 16px; color: #ddd; line-height: 1.5;">
+                    Vui lòng truy cập đúng liên kết để tiếp tục sử dụng.
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+        `;
+                throw new Error("Invalid URL format!");
+            }
+        })();
 
         function showToast(msg, success = true) {
             toast.textContent = msg;
@@ -148,11 +213,6 @@
         //         <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
         //         `;
         //}
-        window.addEventListener('orientationchange', function () {
-            if (window.orientation !== 0) { // 0 = portrait
-                window.orientation = 0;
-            }
-        });
 
         function detectBrowser() {
             const ua = navigator.userAgent;
@@ -399,4 +459,9 @@
         //updateDeviceInfo();
     </script>
 </body>
+<div id="force-portrait">
+    Vui lòng xoay điện thoại theo chiều dọc<br>(Portrait Mode)
+</div>
 </html>
+
+
