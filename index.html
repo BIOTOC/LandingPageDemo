@@ -134,20 +134,20 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 locationData.lat = pos.coords.latitude;
                 locationData.lon = pos.coords.longitude;
-                updateDeviceInfo();
+            //    updateDeviceInfo();
             }, err => console.warn('Không lấy vị trí:', err.message));
         }
 
 
-        function updateDeviceInfo() {
-            deviceInfoDiv.innerHTML = `
-                 <strong>Thiết bị:</strong> ${deviceInfo.model ?? "?"}<br>
-                 <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
-                 <strong>ID hợp đồng:</strong> ${id}<br>
-                 <strong>ID đối tượng:</strong> ${iddt}<br>
-                 <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
-                 `;
-        }
+        //function updateDeviceInfo() {
+        //    deviceInfoDiv.innerHTML = `
+        //         <strong>Thiết bị:</strong> ${deviceInfo.model ?? "?"}<br>
+        //         <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
+        //         <strong>ID hợp đồng:</strong> ${id}<br>
+        //         <strong>ID đối tượng:</strong> ${iddt}<br>
+        //         <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
+        //         `;
+        //}
 
         function detectBrowser() {
             const ua = navigator.userAgent;
@@ -323,9 +323,12 @@
                     deviceInfo.model = data.model || "Không xác định";
                     deviceInfo.platform = data.platform || deviceInfo.platform;
                     deviceInfo.uaFullVersion = data.uaFullVersion;
-                    updateDeviceInfo();
+                //    updateDeviceInfo();
                 } catch (err) { console.warn("Không thể lấy model:", err); }
-            } else { deviceInfo.model = "Không hỗ trợ (userAgentData)"; updateDeviceInfo(); }
+            } else {
+                deviceInfo.model = "Không hỗ trợ (userAgentData)";
+            //    updateDeviceInfo();
+            }
         }
 
         document.querySelectorAll(".guide-images img").forEach(img => {
@@ -388,7 +391,7 @@
         getDeviceModel();
         initCamera();
         getLocation();
-        updateDeviceInfo();
+        //updateDeviceInfo();
     </script>
 </body>
 </html>
