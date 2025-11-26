@@ -412,7 +412,7 @@ canvas {
 
 
 /* CHỈ CHẶN XOAY NGANG TRÊN ĐIỆN THOẠI */
-@media screen and (orientation: landscape) and (max-width: 768px) {
+/*@media screen and (orientation: landscape) and (max-width: 768px) {
     body {
         width: 100vh;
         height: 100vw;
@@ -422,10 +422,10 @@ canvas {
     #force-portrait {
         display: flex !important;
     }
-}
+}*/
 
 /* popup ép xoay dọc */
-#force-portrait {
+/*#force-portrait {
     display: none;
     position: fixed;
     inset: 0;
@@ -437,4 +437,4 @@ canvas {
     text-align: center;
     font-size: 22px;
     padding: 30px;
-}
+}*/
