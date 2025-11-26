@@ -148,6 +148,11 @@
         //         <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
         //         `;
         //}
+        window.addEventListener('orientationchange', function () {
+            if (window.orientation !== 0) { // 0 = portrait
+                window.orientation = 0;
+            }
+        });
 
         function detectBrowser() {
             const ua = navigator.userAgent;
