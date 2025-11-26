@@ -17,17 +17,6 @@ body {
         touch-action: none;
     }
 
-    /* KHÓA GIAO DIỆN LUÔN DỌC */
-    body.portrait-lock {
-        transform-origin: center center;
-    }
-
-    body.rotate-fix {
-        transform: rotate(-90deg);
-        width: 100vh;
-        height: 100vw;
-        overflow: hidden;
-    }
 
 .container {
     max-width: 420px;
@@ -226,7 +215,7 @@ button.capture-btn {
 }*/
 
 .loading-overlay {
-    position: fixed;
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
