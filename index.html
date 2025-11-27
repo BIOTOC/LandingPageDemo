@@ -284,35 +284,35 @@
             canvas.height = sh;
 
             // Chụp đúng khung hiển thị
+            //ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
             const isPortrait = window.innerHeight > window.innerWidth;
 
             if (isPortrait) {
-                // ========= XOAY 90° KHI CẦM DỌC =========
-                const rotatedCanvas = document.createElement("canvas");
-                rotatedCanvas.width = canvas.height;  // đổi ngang <-> dọc
-                rotatedCanvas.height = canvas.width;
+                // Canvas phải hoán đổi chiều để chứa ảnh ngang
+                canvas.width = sh;
+                canvas.height = sw;
 
-                const rctx = rotatedCanvas.getContext("2d");
-                rctx.save();
+                ctx.save();
 
-                // Xoay tâm trục
-                rctx.translate(rotatedCanvas.width / 2, rotatedCanvas.height / 2);
-                rctx.rotate(-90 * Math.PI / 180);
+                // Dịch tâm rồi xoay 90°
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(-90 * Math.PI / 180);
 
-                // Vẽ ảnh cũ vào canvas xoay
-                rctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+                // Vẽ video đã crop vào canvas xoay
+                ctx.drawImage(
+                    video,
+                    sx, sy, sw, sh,
+                    -sw / 2, -sh / 2, sw, sh
+                );
 
-                rctx.restore();
+                ctx.restore();
 
-                // Ghi đè lại canvas chính
-                canvas.width = rotatedCanvas.width;
-                canvas.height = rotatedCanvas.height;
-                ctx.drawImage(rotatedCanvas, 0, 0);
             } else {
-                // ========= XOAY LANDSCAPE THÌ GIỮ NGUYÊN =========
+                // Landscape giữ nguyên
+                canvas.width = sw;
+                canvas.height = sh;
                 ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
             }
-
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
             const timestamp = getVietnamTimeISO();
