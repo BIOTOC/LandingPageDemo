@@ -108,7 +108,6 @@
         //Check url hợp lệ
         (function validateUrlParams() {
             /*const query = window.location.search.replace("?", "");*/
-
             let query = window.location.search;
 
             query = decodeURIComponent(query)
@@ -464,7 +463,7 @@
         function getFinalDeviceName() {
 
             // 1. Ưu tiên model (Android / iPhone)
-            if (deviceInfo.model && deviceInfo.model !== "Không xác định") {
+            if (deviceInfo.model && deviceInfo.model !== "Không xác định" && deviceInfo.model !== "Không hỗ trợ (userAgentData)") {
                 return deviceInfo.model;
             }
 
