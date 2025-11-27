@@ -1,5 +1,4 @@
-﻿/* RESET */
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -19,7 +18,6 @@ body.no-scroll {
 }
 
 /* ===== VÙNG CAMERA ===== */
-
 .container {
     width: 100%;
     max-width: 480px;
@@ -56,67 +54,71 @@ video {
     opacity: 0.6;
     pointer-events: none;
 }
-
-/* ======= LANDSCAPE MODE ======= */
+/* ======= LANDSCAPE MODE – SỬA ĐÚNG, KHÔNG PHÁ LAYOUT ======= */
 @media (orientation: landscape) {
 
+    /* Không động vào body để tránh phá layout */
     body {
         background: white !important;
     }
 
+    /* Container vẫn giữ layout cũ, chỉ bỏ padding */
     .container {
-        max-width: 100%;
         width: 100%;
-        margin: 0;
+        max-width: 100%;
         padding: 0;
+        margin: 0 auto;
         border-radius: 0;
         box-shadow: none;
         background: white;
     }
 
+    /* Chỉ căn giữa video-container thôi */
     .video-container {
-        width: 100vw;
-        height: 100vh;
-        aspect-ratio: unset !important;
-        border-radius: 0;
-        overflow: hidden;
-        position: relative;
+        width: 90vw;
+        height: 90vh;
         background: black;
+        overflow: hidden;
+        border-radius: 0;
+        margin: 0 auto; /* Căn giữa theo chiều ngang */
+        position: relative;
+        display: flex; /* Căn giữa video bên trong */
+        justify-content: center;
+        align-items: center;
     }
 
-    /* Xoay video */
+        /* Video tự căn giữa bên trong */
         .video-container video {
-            position: absolute;
-            width: 100vw !important;
-            height: auto !important;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(0deg);
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            transform: rotate(0deg);
+            position: relative;
         }
 
-    /* Xoay overlay theo video */
-    .video-container .overlay {
-        position: absolute;
-        width: 120vh;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-90deg);
-        pointer-events: none;
-        opacity: 0.6;
-    }
+        /* Overlay xoay -90° theo yêu cầu */
+        .video-container .overlay {
+            position: absolute;
+            width: 120vh;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            opacity: 0.6;
+            pointer-events: none;
+        }
 
+    /* Nút chụp – mặc định vẫn ở dưới giữa */
     .capture-btn {
-        bottom: 40px;
-        width: 80px;
-        height: 80px;
-        font-size: 20px;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .angle-buttons {
         margin-top: 20px;
     }
 }
+
 
 /* ===== NÚT CHỤP ===== */
 .capture-btn {

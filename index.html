@@ -15,7 +15,7 @@
             urlParams.set('token', Token);
             urlParams.set('ts', Ts);
             urlParams.set('id', Id);
-            urlParams.set('id_dt', Iddt);
+            urlParams.set('iddt', Iddt);
             const newUrl = window.location.pathname + "?" + urlParams.toString();
             window.history.replaceState({}, '', newUrl);
         }
@@ -91,7 +91,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        const iddt = params.get('id_dt');
+        const iddt = params.get('iddt');
         const token = params.get('token');
         const ts = params.get('ts');
 
@@ -109,7 +109,7 @@
         (function validateUrlParams() {
             const query = window.location.search.replace("?", "");
 
-            const pattern = /^token=.+&ts=.+&id=.+&id_dt=.+$/;
+            const pattern = /^token=.+&ts=\d+&id=\d+&iddt=\d+$/;
 
             if (!pattern.test(query)) {
                 document.body.innerHTML = `
