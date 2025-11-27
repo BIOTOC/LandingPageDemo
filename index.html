@@ -42,7 +42,7 @@
         <div class="video-container">
             <video id="camera" autoplay playsinline></video>
             <img id="overlay" class="overlay" src="" alt="Khung hướng dẫn" style="display:none;" />
-            <!--<div class="info-overlay" id="deviceInfo">Đang lấy thông tin...</div>-->
+            <div class="info-overlay" id="deviceInfo">Đang lấy thông tin...</div>
             <button class="capture-btn" id="captureBtn">
                 <img src="/Resources/camera.png" alt="Chụp" class="camera-icon" />
             </button>
@@ -81,7 +81,7 @@
         const canvas = document.getElementById('canvas');
         const preview = document.getElementById('preview');
         const captureBtn = document.getElementById('captureBtn');
-        //const deviceInfoDiv = document.getElementById('deviceInfo');
+        const deviceInfoDiv = document.getElementById('deviceInfo');
         const photoCountDiv = document.getElementById('photoCount');
         const loadingOverlay = document.getElementById('loading');
         const toast = document.getElementById('toast');
@@ -199,20 +199,20 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 locationData.lat = pos.coords.latitude;
                 locationData.lon = pos.coords.longitude;
-                //    updateDeviceInfo();
+                    updateDeviceInfo();
             }, err => console.warn('Không lấy vị trí:', err.message));
         }
 
 
-        //function updateDeviceInfo() {
-        //    deviceInfoDiv.innerHTML = `
-        //         <strong>Thiết bị:</strong> ${deviceInfo.model ?? "?"}<br>
-        //         <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
-        //         <strong>ID hợp đồng:</strong> ${id}<br>
-        //         <strong>ID đối tượng:</strong> ${iddt}<br>
-        //         <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
-        //         `;
-        //}
+        function updateDeviceInfo() {
+            deviceInfoDiv.innerHTML = `
+                 <strong>Thiết bị:</strong> ${getFinalDeviceName()}<br>
+                 <strong>Trình duyệt:</strong> ${detectBrowser()}<br>
+                 <strong>ID hợp đồng:</strong> ${id}<br>
+                 <strong>ID đối tượng:</strong> ${iddt}<br>
+                 <strong>Vĩ độ:</strong> ${locationData.lat ?? "?"} | <strong>Kinh độ:</strong> ${locationData.lon ?? "?"}
+                 `;
+        }
 
         function detectBrowser() {
             const ua = navigator.userAgent;
@@ -357,7 +357,7 @@
                     Latitude: locationData.lat?.toString() ?? "",
                     CaptureTime: p.timestamp,
                     Browser: detectBrowser(),
-                    Device: deviceInfo.model ?? navigator.userAgent,
+                    Device: getFinalDeviceName(),
                     LinkImg: "",
                     TypeImg: "image/jpeg"
                 }))
@@ -446,12 +446,37 @@
                     deviceInfo.model = data.model || "Không xác định";
                     deviceInfo.platform = data.platform || deviceInfo.platform;
                     deviceInfo.uaFullVersion = data.uaFullVersion;
-                    //    updateDeviceInfo();
+                        updateDeviceInfo();
                 } catch (err) { console.warn("Không thể lấy model:", err); }
             } else {
                 deviceInfo.model = "Không hỗ trợ (userAgentData)";
-                //    updateDeviceInfo();
+                    updateDeviceInfo();
             }
+        }
+
+        function getFinalDeviceName() {
+
+            // 1. Ưu tiên model (Android / iPhone)
+            if (deviceInfo.model && deviceInfo.model !== "Không xác định") {
+                return deviceInfo.model;
+            }
+
+            // 2. Nếu không có model → dùng platform + version
+            if (deviceInfo.platform && deviceInfo.platformVersion) {
+                return `${deviceInfo.platform} ${deviceInfo.platformVersion}`;
+            }
+
+            // 3. Nếu không có userAgentData → dùng userAgent
+            if (navigator.userAgent) {
+                if (/android/i.test(navigator.userAgent)) return "Android device";
+                if (/iphone/i.test(navigator.userAgent)) return "iPhone";
+                if (/windows/i.test(navigator.userAgent)) return "Windows PC";
+                if (/mac/i.test(navigator.userAgent)) return "Macbook";
+                if (/linux/i.test(navigator.userAgent)) return "Linux device";
+            }
+
+            // 4. Cuối cùng luôn có giá trị
+            return "Unknown Device";
         }
 
         document.querySelectorAll(".guide-images img").forEach(img => {
@@ -515,7 +540,7 @@
         getDeviceModel();
         initCamera();
         getLocation();
-        //updateDeviceInfo();
+        updateDeviceInfo();
 
     </script>
 </body>
