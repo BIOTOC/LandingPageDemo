@@ -75,8 +75,8 @@ video {
 
     /* Chỉ căn giữa video-container thôi */
     .video-container {
-        width: 90vw;
-        height: 90vh;
+        width: 80vw;
+        height: 95vh;
         background: black;
         overflow: hidden;
         border-radius: 0;
@@ -99,7 +99,7 @@ video {
         /* Overlay xoay -90° theo yêu cầu */
         .video-container .overlay {
             position: absolute;
-            width: 120vh;
+            width: 110vh;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-90deg);
