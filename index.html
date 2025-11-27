@@ -107,7 +107,14 @@
 
         //Check url hợp lệ
         (function validateUrlParams() {
-            const query = window.location.search.replace("?", "");
+            /*const query = window.location.search.replace("?", "");*/
+
+            let query = window.location.search;
+
+            query = decodeURIComponent(query)
+                .replace(/^\?/, '')
+                .replace(/#.*$/, '')
+                .trim();
 
             const pattern = /^token=.+&ts=\d+&id=\d+&iddt=\d+$/;
 
