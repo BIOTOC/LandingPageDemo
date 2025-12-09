@@ -1,19 +1,5 @@
-﻿// chạy ngay lập tức để đảm bảo URL hợp lệ
-const urlParams = new URLSearchParams(window.location.search);
-if (!urlParams.has('token')) {
-    const Token = "1234";
-    const Ts = "12233223"
-    const Id = "1";
-    const Iddt = "1";
-    urlParams.set('token', Token);
-    urlParams.set('ts', Ts);
-    urlParams.set('id', Id);
-    urlParams.set('iddt', Iddt);
-    const newUrl = window.location.pathname + "?" + urlParams.toString();
-    window.history.replaceState({}, '', newUrl);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
+﻿
+document.addEventListener("DOMContentLoaded", async () => {
     const video = document.getElementById('camera');
     const canvas = document.getElementById('canvas');
     const preview = document.getElementById('preview');
@@ -42,9 +28,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add('no-scroll');
     loadingOverlay.style.display = 'flex';
 
+    if (angleButtons.length > 0) angleButtons[0].click();
+
+    photos.forEach(p => {
+        const btn = document.querySelector(`#angleButtons button[data-angle="${p.angleKey}"]`);
+        if (btn) {
+            btn.classList.add("captured");
+            btn.disabled = true;
+        }
+    });
+
     //Check url hợp lệ
     (function validateUrlParams() {
-        /*const query = window.location.search.replace("?", "");*/
         let query = window.location.search;
 
         query = decodeURIComponent(query)
@@ -55,57 +50,68 @@ document.addEventListener("DOMContentLoaded", () => {
         const pattern = /^token=.+&ts=\d+&id=\d+&iddt=\d+$/;
 
         if (!pattern.test(query)) {
-            document.body.innerHTML = `
-            <div style="
-                position: fixed;
-                inset: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: linear-gradient(135deg, #1c1c28, #101018);
-                color: white;
-                text-align: center;
-                padding: 20px;
-                font-family: 'Segoe UI', sans-serif;
-            ">
-                <div style="
-                    background: rgba(255, 255, 255, 0.07);
-                    padding: 40px 25px;
-                    border-radius: 14px;
-                    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-                    backdrop-filter: blur(6px);
-                    max-width: 360px;
-                    width: 90%;
-                    animation: fadeIn 0.3s ease-out;
-                ">
-                    <div style="
-                        font-size: 60px;
-                        font-weight: 700;
-                        margin-bottom: 10px;
-                        color: #ff6b6b;
-                        text-shadow: 0 0 12px rgba(255, 80, 80, 0.9);
-                    ">⚠</div>
-
-                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">
-                        Đường dẫn không hợp lệ
-                    </div>
-
-                    <div style="font-size: 16px; color: #ddd; line-height: 1.5;">
-                        Vui lòng truy cập đúng liên kết để tiếp tục sử dụng.
-                    </div>
-                </div>
-            </div>
-
-            <style>
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            </style>
-            `;
-            throw new Error("Invalid URL format!");
+            showTokenError("Đường dẫn không hợp lệ", "Vui lòng truy cập đúng liên kết để tiếp tục.");
+            throw new Error("Invalid URL");
         }
     })();
+
+    const isValid = await verifyToken(token, ts, id, iddt);
+
+    if (!isValid) {
+        showTokenError("Token không hợp lệ hoặc đã hết hạn.", "Vui lòng truy cập đúng liên kết để tiếp tục.");
+        throw new Error("Token Expired");
+    }
+
+    function showTokenError(notify, message) {
+        document.body.innerHTML = `
+    <div style="
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #1c1c28, #101018);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+    ">
+        <div style="
+            background: rgba(255, 255, 255, 0.07);
+            padding: 40px 25px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+            backdrop-filter: blur(6px);
+            max-width: 360px;
+            width: 90%;
+            animation: fadeIn 0.3s ease-out;
+        ">
+            <div style="
+                font-size: 60px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                color: #ff6b6b;
+                text-shadow: 0 0 12px rgba(255, 80, 80, 0.9);
+            ">⚠</div>
+
+            <div style="font-size: 28px; font-weight: 600; margin-bottom: 8px;">
+                ${notify}
+            </div>
+
+            <div style="font-size: 16px; color: #ddd; line-height: 1.5;">
+                ${message}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    `;
+    }
 
     function showToast(msg, success = true) {
         toast.textContent = msg;
@@ -136,6 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(err);
         }
     }
+
+    if (angleButtons.length > 0) angleButtons[0].click();
 
     function getLocation() {
         if (!navigator.geolocation) return;
@@ -181,10 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     captureBtn.addEventListener('click', async () => {
         if (!selectedAngle) return showToast('Hãy chọn góc chụp!', false);
-        if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh`, false);
+        if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh!`, false);
 
         if (isAngleCaptured(selectedAngleText)) {
-            return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, false);
+            return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, true);
         }
 
         const container = document.querySelector('.video-container');
@@ -256,7 +264,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const safeName = makeSafeName(selectedAngle);
 
         const photoObj = { dataUrl, angle: selectedAngleText, angleKey: selectedAngle, safeName, timestamp };
+
+        showToast("Chụp ảnh thành công!", true);
+
         photos.push(photoObj);
+
+        // Disable nút của góc vừa chụp
+        const btn = document.querySelector(`#angleButtons button[data-angle="${selectedAngle}"]`);
+        if (btn) {
+            btn.classList.add("captured");
+            btn.disabled = true;
+        }
+
+        selectNextAngle(selectedAngle);
 
         // Tạo preview
         const card = document.createElement('div');
@@ -287,6 +307,14 @@ document.addEventListener("DOMContentLoaded", () => {
             preview.removeChild(card);
             photos = photos.filter(p => p !== photoObj);
             updatePhotoCount();
+
+            // mở lại nút khi ảnh bị xóa
+            const btn = document.querySelector(`#angleButtons button[data-angle="${photoObj.angleKey}"]`);
+            if (btn) {
+                btn.classList.remove("captured");
+                btn.disabled = false;
+                btn.click();
+            }
         });
 
         card.appendChild(img);
@@ -298,18 +326,34 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePhotoCount();
     });
 
+    function selectNextAngle() {
+        const angleArray = Array.from(angleButtons);
+        const currentIndex = angleArray.findIndex(b => b.dataset.angle === selectedAngle);
+
+        // Tìm nút tiếp theo chưa chụp
+        for (let i = currentIndex + 1; i < angleArray.length; i++) {
+            if (!angleArray[i].disabled) {
+                angleArray[i].click();  // auto chọn
+                return;
+            }
+        }
+
+        // Nếu hết → thử quay lại đầu danh sách
+        for (let i = 0; i < angleArray.length; i++) {
+            if (!angleArray[i].disabled) {
+                angleArray[i].click();
+                return;
+            }
+        }
+    }
+
+
     function updatePhotoCount() { photoCountDiv.textContent = `${photos.length} / ${MAX_PHOTOS} ảnh đã chụp`; }
 
 
     uploadAllBtn.addEventListener("click", async () => {
         if (photos.length === 0)
-            return showToast("Chưa có ảnh để upload!", false);
-
-        const result = await getToken();
-        if (!result) return showToast("Không lấy được token!", false);
-
-        const token = result.token;
-        const ts = result.ts;
+            return showToast("Chưa có ảnh để tải lên!", false);
 
         loadingOverlay.style.display = "flex";
         loadingOverlay.querySelector(".loading-text").textContent = "Đang tải ảnh lên...";
@@ -336,6 +380,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         formData.append("data", JSON.stringify(dataObj));
 
+        //--------------------------------------------------------------------
+        for (const photo of photos) {
+            const blob = await (await fetch(photo.dataUrl)).blob();
+            const sizeMB = blob.size / (1024 * 1024);
+
+            if (sizeMB > 5) {
+                loadingOverlay.style.display = "none";
+                showToast(`Ảnh "${photo.angle}" vượt quá 5MB (${sizeMB.toFixed(2)}MB) – Không thể tải lên!`, false);
+                return;
+            }
+        }
+        //--------------------------------------------------------------------
 
         for (const photo of photos) {
             const blob = await (await fetch(photo.dataUrl)).blob();
@@ -356,57 +412,36 @@ document.addEventListener("DOMContentLoaded", () => {
             const json = await res.json();
             console.log("Kết quả:", json);
 
-            if (!res.ok) throw new Error(json?.message || "Upload thất bại");
+            if (!res.ok) throw new Error(json?.message || "❌ Tải ảnh thất bại!");
 
-            showToast("✔ Upload thành công!");
-            photos = [];
-            preview.innerHTML = "";
+            showToast("✔ Tải ảnh thành công!");
+            //photos = [];
+            //preview.innerHTML = "";
             updatePhotoCount();
 
         } catch (err) {
             console.error(err);
-            showToast("❌ Upload thất bại!", false);
+            showToast("❌ Tải ảnh thất bại!", false);
         }
 
         loadingOverlay.style.display = "none";
     });
 
-    async function getToken() {
-        try {
-            const url = `https://aut.bshc.com.vn/api/car-insur/generate-token?id=1&id_dt=1`;
+    async function verifyToken(token, ts, id, iddt) {
+        const url = `https://aut.bshc.com.vn/api/car-insur/verify-token?token=${token}&ts=${ts}&id=${id}&iddt=${iddt}`;
 
+        try {
             const response = await fetch(url, {
                 method: "GET",
                 headers: {
-                    "Accept": "application/json",
-                    "Cookie": "bsh=CfDJ8IAnqBtnM29GopL1XE8TUZWdPQL4vZGBzt%2BrgZVndh80aw1CEJ%2BPKgoNO2FVv7nUNvGh58E4tFlYQFdpsRWHPsKdiLAkXZ%2FKETgswhElb39uLMOAD0qTUmXgLgslRiOLffSCUcwAwYijoxkWbkSrH3mwWtAOdCSv7qfAyKWYm9lk"
+                    "Accept": "application/json"
                 }
             });
 
-            const json = await response.json();
-
-            if (json.Status !== "OK" || !json.Data) {
-                console.error("Token API error:", json);
-                console.log("TOKEN API result:", json);
-                return null;
-            }
-
-            const token = json.Data.Token;
-            const ts = json.Data.Timestamp;
-
-            const params = new URLSearchParams(window.location.search);
-            if (!params.get("token") || !params.get("ts")) {
-                params.set("token", token);
-                params.set("ts", ts);
-                const newUrl = window.location.pathname + "?" + params.toString();
-                window.history.replaceState({}, "", newUrl);
-            }
-
-            return { token, ts };
-
+            return response.status === 200;
         } catch (error) {
-            console.error("Lỗi khi gọi getToken:", error);
-            return null;
+            console.error("Lỗi khi verify token:", error);
+            return false;
         }
     }
 
