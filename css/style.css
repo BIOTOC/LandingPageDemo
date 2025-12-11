@@ -322,9 +322,10 @@ canvas {
 #uploadAllBtn {
     margin-top: 12px;
     width: 100%;
-    min-height: 40px;
-    padding: 12px 12px 12px 12px;
-    font-size: 16px;
+    min-height: 30px;
+    padding: 10px 10px 10px 10px;
+    font-size: 14px;
+    font-weight: bold;
     border: none;
     border-radius: 8px;
     background-color: rgba(252, 146, 0, 1);
