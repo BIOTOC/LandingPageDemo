@@ -210,7 +210,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        let dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+
+        if (window.innerHeight > window.innerWidth) {
+            dataUrl = await autoRotate90(dataUrl);
+        }
 
         const timestamp = getVietnamTimeISO();
         const safeName = makeSafeName(selectedAngle);
@@ -283,6 +287,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         updatePhotoCount();
     });
 
+    async function autoRotate90(dataUrl) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.src = dataUrl;
+
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                // Canvas mới sau khi xoay
+                canvas.width = img.height;
+                canvas.height = img.width;
+
+                // Xoay -90 độ
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(-90 * Math.PI / 180);
+                ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+                resolve(canvas.toDataURL("image/jpeg", 0.9));
+            };
+        });
+    }
 
     function selectNextAngle() {
         const angleArray = Array.from(angleButtons);
@@ -577,7 +603,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     lightboxClose.addEventListener("click", () => {
         lightbox.style.display = "none";
     });
-
 
 
     getDeviceModel();
