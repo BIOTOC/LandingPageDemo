@@ -105,7 +105,8 @@ video {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin: 0;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
 
         .angle-buttons button {
@@ -189,8 +190,8 @@ video {
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 13px;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
@@ -478,7 +479,7 @@ canvas {
 .app-header {
     background: white;
     color: white;
-    padding: 10px 16px;
+    padding: 5px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
