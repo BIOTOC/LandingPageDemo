@@ -522,8 +522,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             overlay.style.width = `${video.clientWidth * scale}px`;
             overlay.style.height = `${video.clientHeight * scale}px`;
         } else {
-            overlay.style.width = `${video.clientWidth}px`;
-            overlay.style.height = `${video.clientHeight}px`;
+            let scale = 0.9;
+
+            overlay.style.width = `${video.clientWidth * scale}px`;
+            overlay.style.height = `${video.clientHeight * scale}px`;
         }
     }
 
@@ -603,7 +605,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     lightboxClose.addEventListener("click", () => {
         lightbox.style.display = "none";
     });
-
 
     getDeviceModel();
     initCamera();
