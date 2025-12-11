@@ -9,8 +9,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const loadingOverlay = document.getElementById('loading');
     const toast = document.getElementById('toast');
     const uploadAllBtn = document.getElementById('uploadAllBtn');
-    const lightboxImg = document.getElementById('lightboxImg');
     const angleButtons = document.querySelectorAll('#angleButtons button');
+    const overlay = document.getElementById("overlay");
+
+    const lightbox = document.getElementById("lightbox");
+    lightbox.style.display = 'none';
+    const lightboxClose = document.getElementById("lightboxClose");
+    const lightboxImg = document.getElementById("lightboxImg");
+    const lightboxThumbs = document.getElementById("lightboxThumbs");
+    const rotateBtn = document.getElementById("rotateBtn");
+
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -27,8 +35,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.body.classList.add('no-scroll');
     loadingOverlay.style.display = 'flex';
-
-    if (angleButtons.length > 0) angleButtons[0].click();
 
     photos.forEach(p => {
         const btn = document.querySelector(`#angleButtons button[data-angle="${p.angleKey}"]`);
@@ -187,6 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
     }
 
+
     captureBtn.addEventListener('click', async () => {
         if (!selectedAngle) return showToast('Hãy chọn góc chụp!', false);
         if (photos.length >= MAX_PHOTOS) return showToast(`Đã đủ ${MAX_PHOTOS} ảnh!`, false);
@@ -195,81 +202,32 @@ document.addEventListener("DOMContentLoaded", async () => {
             return showToast(`Bạn đã chụp góc "${selectedAngleText}" rồi! Vui lòng chọn góc chụp khác.`, true);
         }
 
-        const container = document.querySelector('.video-container');
-        const ctx = canvas.getContext('2d');
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-        // Lấy kích thước video thực
-        const vw = video.videoWidth;
-        const vh = video.videoHeight;
-        const cw = container.clientWidth;
-        const ch = container.clientHeight;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-        const videoRatio = vw / vh;
-        const containerRatio = cw / ch;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        let sx, sy, sw, sh;
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
 
-        if (videoRatio > containerRatio) {
-            // Video rộng hơn → crop 2 bên
-            const newWidth = vh * containerRatio;
-            sx = (vw - newWidth) / 2;
-            sy = 0;
-            sw = newWidth;
-            sh = vh;
-        } else {
-            // Video cao hơn → crop trên dưới
-            const newHeight = vw / containerRatio;
-            sx = 0;
-            sy = (vh - newHeight) / 2;
-            sw = vw;
-            sh = newHeight;
-        }
-
-        canvas.width = sw;
-        canvas.height = sh;
-
-        // Chụp đúng khung hiển thị
-        //ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
-        const isPortrait = window.innerHeight > window.innerWidth;
-
-        if (isPortrait) {
-            // Canvas phải hoán đổi chiều để chứa ảnh ngang
-            canvas.width = sh;
-            canvas.height = sw;
-
-            ctx.save();
-
-            // Dịch tâm rồi xoay 90°
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(-90 * Math.PI / 180);
-
-            // Vẽ video đã crop vào canvas xoay
-            ctx.drawImage(
-                video,
-                sx, sy, sw, sh,
-                -sw / 2, -sh / 2, sw, sh
-            );
-
-            ctx.restore();
-
-        } else {
-            // Landscape giữ nguyên
-            canvas.width = sw;
-            canvas.height = sh;
-            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
-        }
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         const timestamp = getVietnamTimeISO();
         const safeName = makeSafeName(selectedAngle);
 
-        const photoObj = { dataUrl, angle: selectedAngleText, angleKey: selectedAngle, safeName, timestamp };
+        const photoObj = {
+            dataUrl,
+            originalDataUrl: dataUrl,
+            rotation: 0,
+            angle: selectedAngleText,
+            angleKey: selectedAngle,
+            safeName,
+            timestamp
+        };
 
         showToast("Chụp ảnh thành công!", true);
-
         photos.push(photoObj);
 
-        // Disable nút của góc vừa chụp
         const btn = document.querySelector(`#angleButtons button[data-angle="${selectedAngle}"]`);
         if (btn) {
             btn.classList.add("captured");
@@ -278,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         selectNextAngle(selectedAngle);
 
-        // Tạo preview
+        // Preview
         const card = document.createElement('div');
         card.className = 'img-card';
 
@@ -294,9 +252,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         label.className = 'angle-label';
         label.textContent = photoObj.angle;
 
-        const ts = document.createElement('div');
-        ts.className = 'timestamp';
-        ts.textContent = photoObj.timestamp;
+        //const ts = document.createElement('div');
+        //ts.className = 'timestamp';
+        //ts.textContent = photoObj.timestamp;
 
         const del = document.createElement('div');
         del.className = 'delete-btn';
@@ -308,7 +266,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             photos = photos.filter(p => p !== photoObj);
             updatePhotoCount();
 
-            // mở lại nút khi ảnh bị xóa
             const btn = document.querySelector(`#angleButtons button[data-angle="${photoObj.angleKey}"]`);
             if (btn) {
                 btn.classList.remove("captured");
@@ -319,26 +276,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         card.appendChild(img);
         card.appendChild(label);
-        card.appendChild(ts);
+        //card.appendChild(ts);
         card.appendChild(del);
         preview.appendChild(card);
 
         updatePhotoCount();
     });
 
+
     function selectNextAngle() {
         const angleArray = Array.from(angleButtons);
         const currentIndex = angleArray.findIndex(b => b.dataset.angle === selectedAngle);
 
-        // Tìm nút tiếp theo chưa chụp
         for (let i = currentIndex + 1; i < angleArray.length; i++) {
             if (!angleArray[i].disabled) {
-                angleArray[i].click();  // auto chọn
+                angleArray[i].click();
                 return;
             }
         }
-
-        // Nếu hết → thử quay lại đầu danh sách
         for (let i = 0; i < angleArray.length; i++) {
             if (!angleArray[i].disabled) {
                 angleArray[i].click();
@@ -380,7 +335,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         formData.append("data", JSON.stringify(dataObj));
 
-        //--------------------------------------------------------------------
         for (const photo of photos) {
             const blob = await (await fetch(photo.dataUrl)).blob();
             const sizeMB = blob.size / (1024 * 1024);
@@ -391,7 +345,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
         }
-        //--------------------------------------------------------------------
 
         for (const photo of photos) {
             const blob = await (await fetch(photo.dataUrl)).blob();
@@ -485,15 +438,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         return "Unknown Device";
     }
 
-    document.querySelectorAll(".guide-images img").forEach(img => {
-        img.addEventListener("click", () => {
-            lightboxImg.src = img.src;
-            lightbox.style.display = "flex";
-        });
-    });
-
-    const overlay = document.getElementById("overlay");
-
     function changeOverlay(angle) {
         if (!angle) {
             overlay.style.display = "none";
@@ -528,19 +472,112 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    const lightbox = document.getElementById("lightbox");
-    const lightboxClose = document.getElementById("lightboxClose");
+    function resizeOverlay() {
+        const overlay = document.querySelector('.overlay');
+        const video = document.querySelector('video');
+
+        if (!overlay || !video) return;
+
+        const isLandscape = window.innerWidth > window.innerHeight;
+
+        if (isLandscape) {
+            let scale = 1.5;
+
+            // Giảm scale cho iPad
+            if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
+                scale = 1.2; 
+            }
+            else if ((window.screen.width === 1180 && window.screen.height === 820) ||
+                (window.screen.width === 1194 && window.screen.height === 834) ||
+                (window.screen.width === 1366 && window.screen.height === 1024)) {
+                scale = 1.2;
+            }
+
+            overlay.style.width = `${video.clientWidth * scale}px`;
+            overlay.style.height = `${video.clientHeight * scale}px`;
+        } else {
+            overlay.style.width = `${video.clientWidth}px`;
+            overlay.style.height = `${video.clientHeight}px`;
+        }
+    }
+
+    window.addEventListener('resize', resizeOverlay);
+    resizeOverlay();
+
+    function openLightbox(photo) {
+        lightboxImg.src = photo.dataUrl;
+        lightboxImg.alt = photo.safeName;
+        lightboxImg.style.transform = `rotate(0deg)`;
+
+        lightbox.style.display = "flex";
+
+        lightboxThumbs.innerHTML = "";
+        photos.forEach(p => {
+            const thumb = document.createElement("img");
+            thumb.src = p.dataUrl;
+            thumb.classList.toggle("selected", p.safeName === photo.safeName);
+
+            thumb.addEventListener("click", () => {
+                lightboxImg.src = p.dataUrl;
+                lightboxImg.alt = p.safeName;
+                lightboxImg.style.transform = `rotate(0deg)`;
+
+                lightboxThumbs.querySelectorAll("img").forEach(i => i.classList.remove("selected"));
+                thumb.classList.add("selected");
+            });
+
+            lightboxThumbs.appendChild(thumb);
+        });
+    }
+
+    function rotatePhoto(photo, angle = 90) {
+        const img = new Image();
+        img.src = photo.originalDataUrl;
+
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            photo.rotation = (photo.rotation + angle) % 360;
+
+            const isRotate90Or270 = photo.rotation % 180 !== 0;
+            canvas.width = isRotate90Or270 ? img.height : img.width;
+            canvas.height = isRotate90Or270 ? img.width : img.height;
+
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(photo.rotation * Math.PI / 180);
+            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+            photo.dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+
+            if (lightboxImg.alt === photo.safeName) {
+                lightboxImg.src = photo.dataUrl;
+                lightboxImg.style.transform = `rotate(0deg)`;
+            }
+
+            const previewImg = [...preview.querySelectorAll("img")].find(i => i.alt === photo.safeName);
+            if (previewImg) previewImg.src = photo.dataUrl;
+        };
+    }
+
+    rotateBtn.addEventListener("click", () => {
+        const photo = photos.find(p => p.safeName === lightboxImg.alt);
+        if (!photo) return;
+
+        rotatePhoto(photo, 90);
+    });
+
+    preview.addEventListener("click", (e) => {
+        const card = e.target.closest(".img-card");
+        if (!card) return;
+        const photo = photos.find(p => p.safeName === card.querySelector("img").alt);
+        if (photo) openLightbox(photo);
+    });
 
     lightboxClose.addEventListener("click", () => {
         lightbox.style.display = "none";
     });
 
-    document.querySelectorAll(".guide-images img, .img-card img").forEach(img => {
-        img.addEventListener("click", () => {
-            lightboxImg.src = img.src;
-            lightbox.style.display = "flex";
-        });
-    });
 
 
     getDeviceModel();

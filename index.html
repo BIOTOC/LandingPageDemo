@@ -11,33 +11,41 @@
 
 </head>
 <body>
+    <header class="app-header">
+        <img src="/Resources/logo-bsh.jpg" alt="BSH Logo" class="logo">
+    </header>
+
     <div class="container">
         <div id="loading" class="loading-overlay">
             <div class="spinner"></div>
             <div class="loading-text">Đang khởi động camera...</div>
         </div>
 
-        <div class="angle-buttons" id="angleButtons">
-            <button data-angle="FRONT_RIGHT">Trước trái</button>
-            <button data-angle="FRONT_LEFT">Trước phải</button>
-            <button data-angle="REAR_RIGHT">Sau trái</button>
-            <button data-angle="REAR_LEFT">Sau phải</button>
-            <button data-angle="INSPECTION_STICKER">Tem đăng kiểm</button>
-        </div>
-
         <div class="video-container">
             <video id="camera" autoplay playsinline></video>
-            <img id="overlay" class="overlay" src="" alt="Khung hướng dẫn" style="display:none;" />
+            <div class="overlay-wrapper">
+                <img id="overlay" class="overlay" src="" alt="Khung hướng dẫn" style="display:none;" />
+            </div>
             <!--<div class="info-overlay" id="deviceInfo">Đang lấy thông tin...</div>-->
             <button class="capture-btn" id="captureBtn">
                 <img src="/Resources/camera.png" alt="Chụp" class="camera-icon" />
             </button>
         </div>
 
-        <div class="instructions">Giữ camera thẳng, chọn góc chụp ở phía trên trước khi chụp. Tối đa 5 ảnh.</div>
-        <div class="photo-count" id="photoCount">0 / 5 ảnh đã chụp</div>
-        <div class="preview" id="preview"></div>
-        <button id="uploadAllBtn">Tải lên tất cả ảnh</button>
+        <div class="right-panel">
+            <div class="angle-buttons" id="angleButtons">
+                <button data-angle="FRONT_RIGHT">Trước trái</button>
+                <button data-angle="FRONT_LEFT">Trước phải</button>
+                <button data-angle="REAR_RIGHT">Sau trái</button>
+                <button data-angle="REAR_LEFT">Sau phải</button>
+                <button data-angle="INSPECTION_STICKER">Tem đăng kiểm</button>
+            </div>
+
+            <button id="uploadAllBtn">Tải lên tất cả ảnh</button>
+
+            <div class="photo-count" id="photoCount">0 / 5 ảnh đã chụp</div>
+            <div class="preview" id="preview"></div>
+        </div>
 
     </div>
 
@@ -47,10 +55,10 @@
     <div id="lightbox">
         <span id="lightboxClose">&times;</span>
         <img id="lightboxImg" />
+        <button id="rotateBtn">⟳</button>
+        <div id="lightboxThumbs" class="lightbox-thumbs"></div>
     </div>
 
     <script src="/js/script.js"></script>
 </body>
 </html>
-
-
