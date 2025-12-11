@@ -23,7 +23,7 @@ body {
     margin: 0px auto;
     background: #ffffff;
     border-radius: 16px;
-    padding: 12px;
+    padding: 10px 12px 10px 12px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
@@ -320,7 +320,7 @@ canvas {
 }
 
 #uploadAllBtn {
-    margin-top: 12px;
+    margin-top: 10px;
     width: 100%;
     min-height: 30px;
     padding: 10px 10px 10px 10px;
@@ -448,8 +448,8 @@ canvas {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 12px;
-    margin-top: 12px;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
     .angle-buttons button {
