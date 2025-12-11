@@ -20,11 +20,10 @@ body {
 /* ===== VÙNG CAMERA ===== */
 .container {
     width: 100%;
-/*    max-width: 480px;
-*/    margin: 5px auto;
+    margin: 0px auto;
     background: #ffffff;
     border-radius: 16px;
-    padding: 18px;
+    padding: 12px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
@@ -408,7 +407,7 @@ canvas {
     top: 50%;
     left: 20px;
     transform: translateY(-50%);
-    font-size: 20px;
+    font-size: 25px;
     color: white;
     background: rgba(0,0,0,0.4);
     border: none;
